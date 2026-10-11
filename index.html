@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Critter Helix Tower 3D: Bouncy Cloud Climb!</title>
+  <link rel="icon" href="icons/hoppy.jpg" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- 3D WebGL Canvas Container -->
+  <div id="webgl-container"></div>
+
+  <!-- Top-Right Floating Audio Toggle -->
+  <button id="btn-audio" class="icon-btn floating-audio" aria-label="Toggle Sound">🔊</button>
+
+  <!-- SCREEN 1: TITLE & 8-CRITTER + 8-TOWER SELECTOR -->
+  <section id="screen-select" class="screen active">
+    <div class="glass-panel">
+      <div class="hero-emblem">
+        <span class="emblem-badge">🌀</span>
+        <span class="emblem-badge bounce-delay">🏰</span>
+        <span class="emblem-badge">👑</span>
+      </div>
+
+      <!-- 8 Smiling Critters Selector Grid -->
+      <div class="selector-label-icons">🐾 ✨ 🐾</div>
+      <div id="critter-grid" class="critter-grid"></div>
+
+      <!-- 8 Helix Towers Selector Row -->
+      <div class="selector-label-icons">🌀 🌈 🏆</div>
+      <div id="tower-grid" class="tower-grid"></div>
+
+      <!-- Giant Pulsing Play Button with Live Selected Critter Avatar + Dual-Icon Perk + Tower Preview -->
+      <button id="btn-play" class="btn-giant-play" aria-label="Start Helix Tower Race">
+        <img id="play-btn-avatar" class="play-btn-avatar" src="icons/hoppy.jpg" alt="🐰" />
+        <span id="play-btn-perk" class="play-btn-perk">⚡⬆️</span>
+        <span class="play-icon">▶️</span>
+        <span id="play-btn-tower" class="play-sub-icons">🍭👑</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- SCREEN 2: IN-GAME ZERO-TEXT VISUAL COCKPIT -->
+  <section id="screen-hud" class="screen">
+    <!-- Top HUD Bar: Home, Selected Critter/Tower Badge, Helix Progress & Visual Fever Gauge -->
+    <div class="hud-top">
+      <button id="btn-home" class="icon-btn" aria-label="Home">🏠</button>
+
+      <div class="hud-hero-chip" id="hud-hero-chip">
+        <img id="hud-player-avatar" class="hud-player-avatar" src="icons/hoppy.jpg" alt="🐰" />
+        <span id="hud-player-perk" class="hud-player-perk">⚡⬆️</span>
+        <span id="hud-tower-badge" class="hud-tower-badge">🍭</span>
+      </div>
+
+      <div class="tower-progress-wrap">
+        <span class="tower-bot-icon">🏁</span>
+        <div class="tower-track-bar">
+          <div id="hud-progress-fill" class="tower-progress-fill"></div>
+          <div id="hud-markers" class="tower-markers"></div>
+        </div>
+        <span class="tower-top-icon">👑</span>
+      </div>
+
+      <div class="hud-score-pills">
+        <div class="pill star-pill">
+          <span>⭐</span>
+          <span id="hud-stars">0</span>
+        </div>
+        <div class="pill combo-pill" id="hud-combo-pill">
+          <span>🔥</span>
+          <span id="hud-combo">x1</span>
+          <div class="combo-fever-bar" aria-hidden="true">
+            <div id="hud-fever-fill" class="combo-fever-fill"></div>
+          </div>
+          <span class="combo-fever-target">🌈</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live 5-Critter Rank Ribbon -->
+    <div id="hud-rank-ribbon" class="rank-ribbon"></div>
+
+    <!-- Rainbow Fever Banner (Iconic) -->
+    <div id="fever-banner" class="fever-banner hidden">
+      <span>🌈</span><span>⚡</span><span>💥</span><span>🌈</span>
+    </div>
+
+    <!-- Bottom Touch Steering Cockpit (Visual Deflection Puck + Giant Buttons) + 3 Power Pedals -->
+    <div class="hud-bottom">
+      <div class="steer-cockpit">
+        <div class="steer-pad">
+          <button id="btn-left" class="steer-btn" aria-label="Rotate Left">⬅️</button>
+          <button id="btn-right" class="steer-btn" aria-label="Rotate Right">➡️</button>
+        </div>
+        <div id="steer-touch-track" class="steer-touch-track" aria-label="Swipe to Rotate Helix">
+          <span class="track-arrow">◀️</span>
+          <div id="steer-thumb-puck" class="steer-thumb-puck">🌀</div>
+          <span class="track-arrow">▶️</span>
+        </div>
+      </div>
+
+      <div class="pedals-dock">
+        <button id="pedal-magnet" class="power-pedal magnet-pedal ready" data-key="1" aria-label="Star Magnet">
+          <span class="pedal-ready-cue">✨👆</span>
+          <span class="pedal-emoji">🌪️</span>
+          <span class="pedal-sub">⭐🧲</span>
+          <div class="pedal-charge-bar"><div id="fill-magnet" class="pedal-fill"></div></div>
+        </button>
+
+        <button id="pedal-rocket" class="power-pedal rocket-pedal ready" data-key="2" aria-label="Rocket Leap">
+          <span class="pedal-ready-cue">✨👆</span>
+          <span class="pedal-emoji">⚡</span>
+          <span class="pedal-sub">🚀⬆️</span>
+          <div class="pedal-charge-bar"><div id="fill-rocket" class="pedal-fill"></div></div>
+        </button>
+
+        <button id="pedal-smash" class="power-pedal smash-pedal ready" data-key="3" aria-label="Mega Smash">
+          <span class="pedal-ready-cue">✨👆</span>
+          <span class="pedal-emoji">💥</span>
+          <span class="pedal-sub">🔨🌈</span>
+          <div class="pedal-charge-bar"><div id="fill-smash" class="pedal-fill"></div></div>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 3: 5-CRITTER CROWN PODIUM / DEFEAT MODAL -->
+  <section id="screen-result" class="screen">
+    <div class="glass-panel result-panel">
+      <div id="result-banner-icons" class="result-banner-icons">🏆 👑 🏆</div>
+      <div id="result-stars-row" class="result-stars-row"></div>
+      <div id="podium-stage" class="podium-stage"></div>
+
+      <div class="result-actions">
+        <button id="btn-result-home" class="action-circle-btn home-btn" aria-label="Select Screen">🏠</button>
+        <button id="btn-retry" class="action-circle-btn retry-btn" aria-label="Retry Tower">🔄</button>
+        <button id="btn-next" class="action-circle-btn next-btn" aria-label="Next Tower">⏭️</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/vendor/three.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

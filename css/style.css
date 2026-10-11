@@ -1,0 +1,1083 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', system-ui, sans-serif;
+  background: radial-gradient(circle at 50% 25%, #2b1854 0%, #14092b 70%, #090314 100%);
+  color: #fff;
+  touch-action: none;
+}
+
+#webgl-container {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+
+#webgl-container canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Floating Audio Button */
+.floating-audio {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 120;
+}
+
+.icon-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.65);
+  background: linear-gradient(145deg, rgba(64, 34, 128, 0.88), rgba(28, 12, 66, 0.92));
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45), inset 0 2px 6px rgba(255, 255, 255, 0.35);
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.icon-btn:hover {
+  transform: scale(1.08);
+}
+
+.icon-btn:active {
+  transform: scale(0.92);
+}
+
+/* Screens */
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: none;
+  pointer-events: none;
+}
+
+.screen.active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Select Screen Docked Layout so 3D Bouncing Critters on Ring 0 are 100% visible! */
+#screen-select.active {
+  justify-content: flex-end;
+  padding: 12px;
+}
+
+.glass-panel {
+  pointer-events: auto;
+  width: min(94vw, 520px);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: linear-gradient(165deg, rgba(44, 22, 94, 0.84), rgba(18, 8, 46, 0.90));
+  border: 3px solid rgba(255, 220, 110, 0.65);
+  border-radius: 30px;
+  padding: 14px 18px;
+  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.65), 0 0 35px rgba(175, 95, 255, 0.35);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Landscape: Dock Selector Panel on Left (44% width) so Right 56% showcases 3D Hero Critter */
+@media (min-aspect-ratio: 11/10) and (min-width: 680px) {
+  #screen-select.active {
+    align-items: flex-start;
+    justify-content: center;
+    padding-left: max(18px, 3vw);
+  }
+  #screen-select .glass-panel {
+    width: min(45vw, 470px);
+    max-height: 92vh;
+  }
+}
+
+/* Portrait: Dock Selector Panel as Bottom Sheet so Top 44% showcases 3D Hero Critter */
+@media (max-aspect-ratio: 11/10), (max-width: 679px) {
+  #screen-select.active {
+    justify-content: flex-end;
+    padding-bottom: 10px;
+  }
+  #screen-select .glass-panel {
+    width: min(95vw, 500px);
+    max-height: 56vh;
+    padding: 10px 14px;
+    gap: 7px;
+  }
+  #screen-select .hero-emblem {
+    display: none;
+  }
+}
+
+.hero-emblem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 2px 12px;
+}
+
+.emblem-badge {
+  font-size: 34px;
+  filter: drop-shadow(0 4px 10px rgba(255, 215, 0, 0.65));
+  animation: floatPulse 2.2s ease-in-out infinite;
+}
+
+.emblem-badge.bounce-delay {
+  font-size: 42px;
+  animation-delay: 0.35s;
+}
+
+@keyframes floatPulse {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-6px) scale(1.1); }
+}
+
+.selector-label-icons {
+  font-size: 18px;
+  letter-spacing: 5px;
+  opacity: 0.92;
+}
+
+/* 8 Smiling Critters Grid */
+.critter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+
+.critter-card {
+  position: relative;
+  border-radius: 18px;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.16s, box-shadow 0.16s;
+}
+
+.critter-card:hover {
+  transform: translateY(-3px) scale(1.03);
+}
+
+.critter-card.selected {
+  border-color: #ffd700;
+  background: linear-gradient(145deg, rgba(255, 215, 0, 0.28), rgba(255, 105, 180, 0.25));
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.7), inset 0 0 12px rgba(255, 255, 255, 0.35);
+  transform: translateY(-3px) scale(1.04);
+}
+
+.critter-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.critter-badges {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(0, 0, 0, 0.28);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+/* 8 Helix Towers Grid */
+.tower-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+
+.tower-card {
+  position: relative;
+  border-radius: 16px;
+  padding: 6px 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 3px solid rgba(255, 255, 255, 0.22);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s, box-shadow 0.15s;
+}
+
+.tower-card.selected {
+  border-color: #00f2fe;
+  background: linear-gradient(145deg, rgba(0, 242, 254, 0.28), rgba(120, 75, 255, 0.28));
+  box-shadow: 0 0 18px rgba(0, 242, 254, 0.65);
+  transform: scale(1.04);
+}
+
+.tower-card.locked {
+  opacity: 0.45;
+  filter: grayscale(0.65);
+  cursor: not-allowed;
+}
+
+.tower-icon {
+  font-size: 24px;
+}
+
+.tower-stars {
+  font-size: 12px;
+  letter-spacing: 1px;
+  min-height: 16px;
+}
+
+/* Giant Play Button with Live Selected Critter Avatar + Dual-Icon Perk + Tower Preview */
+.btn-giant-play {
+  margin-top: 2px;
+  width: min(92%, 340px);
+  height: 66px;
+  border-radius: 999px;
+  border: 4px solid #fff;
+  background: linear-gradient(135deg, #00e676 0%, #00b0ff 50%, #7c4dff 100%);
+  box-shadow: 0 10px 28px rgba(0, 230, 118, 0.55), inset 0 3px 8px rgba(255, 255, 255, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  animation: pulsePlay 1.6s ease-in-out infinite;
+}
+
+.play-btn-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #ffd700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+}
+
+.play-btn-perk {
+  font-size: 20px;
+  background: rgba(0, 0, 0, 0.28);
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+@keyframes pulsePlay {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.play-icon {
+  font-size: 30px;
+}
+
+.play-sub-icons {
+  font-size: 24px;
+}
+
+/* IN-GAME HUD */
+#screen-hud.active {
+  justify-content: space-between;
+  padding: 12px 14px 16px;
+}
+
+.hud-top {
+  pointer-events: auto;
+  width: min(96vw, 820px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 60px;
+}
+
+.hud-hero-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(22, 10, 52, 0.85);
+  border: 2px solid #ffd700;
+  border-radius: 999px;
+  padding: 4px 10px 4px 5px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+}
+
+.hud-player-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+}
+
+.hud-player-perk {
+  font-size: 15px;
+}
+
+.hud-tower-badge {
+  font-size: 20px;
+}
+
+.tower-progress-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(18, 8, 44, 0.78);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  padding: 6px 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+
+.tower-top-icon, .tower-bot-icon {
+  font-size: 22px;
+}
+
+.tower-track-bar {
+  position: relative;
+  flex: 1;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  overflow: visible;
+}
+
+.tower-progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ff4081, #ffd740, #00e676, #00e5ff);
+  transition: width 0.08s linear;
+}
+
+.tower-markers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.racer-dot {
+  position: absolute;
+  top: 50%;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid #fff;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.65);
+  transition: left 0.08s linear;
+}
+
+.racer-dot.is-player {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #ffd700;
+  z-index: 5;
+  box-shadow: 0 0 12px #ffd700;
+}
+
+.hud-score-pills {
+  display: flex;
+  gap: 8px;
+}
+
+.pill {
+  background: rgba(22, 10, 52, 0.85);
+  border: 2px solid rgba(255, 215, 0, 0.65);
+  border-radius: 999px;
+  padding: 5px 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 19px;
+  font-weight: 900;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.16s ease;
+}
+
+.pill.pill-bump {
+  transform: scale(1.26);
+  box-shadow: 0 0 20px #ffd700;
+}
+
+/* Visual Fever Charge Progress Bar inside Combo Pill */
+.combo-pill {
+  border-color: #ff6d00;
+  gap: 5px;
+}
+
+.combo-fever-bar {
+  width: 48px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.combo-fever-fill {
+  width: 20%;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ff9100, #ffea00, #00e676, #00e5ff, #d500f9);
+  transition: width 0.12s ease;
+}
+
+.combo-fever-target {
+  font-size: 16px;
+}
+
+.combo-pill.fever-active {
+  background: linear-gradient(90deg, #ff1744, #ffea00, #00e676, #2979ff, #d500f9);
+  border-color: #fff;
+  animation: pulsePlay 0.45s ease-in-out infinite;
+}
+
+/* Pooled Flying DOM Star Coins */
+.flying-star-coin {
+  position: fixed;
+  left: 0;
+  top: 0;
+  font-size: 26px;
+  pointer-events: none;
+  z-index: 95;
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.95));
+  will-change: transform, opacity;
+  display: none;
+}
+
+/* Rank Ribbon */
+.rank-ribbon {
+  pointer-events: none;
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  background: rgba(16, 6, 38, 0.72);
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.24);
+}
+
+.rank-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid transparent;
+  font-size: 16px;
+  font-weight: 800;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.rank-chip.player-chip {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.25);
+}
+
+.rank-chip.perk-pulse {
+  transform: scale(1.18);
+  box-shadow: 0 0 16px #00e5ff;
+}
+
+.rank-chip img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Fever Banner */
+.fever-banner {
+  pointer-events: none;
+  font-size: 38px;
+  letter-spacing: 8px;
+  padding: 8px 24px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255,23,68,0.85), rgba(255,234,0,0.85), rgba(0,230,118,0.85), rgba(41,121,255,0.85));
+  border: 3px solid #fff;
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.85);
+  animation: pulsePlay 0.45s infinite;
+}
+
+.fever-banner.hidden {
+  display: none;
+}
+
+/* Bottom HUD Controls */
+.hud-bottom {
+  pointer-events: auto;
+  width: min(96vw, 820px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.steer-cockpit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.steer-pad {
+  display: flex;
+  gap: 10px;
+}
+
+.steer-btn {
+  width: 78px;
+  height: 78px;
+  border-radius: 24px;
+  border: 3px solid rgba(255, 255, 255, 0.72);
+  background: linear-gradient(145deg, rgba(58, 32, 118, 0.88), rgba(24, 10, 56, 0.94));
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5), inset 0 2px 6px rgba(255, 255, 255, 0.35);
+  font-size: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.steer-btn:active, .steer-btn.pressed {
+  transform: scale(0.91);
+  border-color: #00e5ff;
+  box-shadow: 0 0 20px #00e5ff;
+}
+
+/* Visual Swipe / Steer Deflection Track & Puck */
+.steer-touch-track {
+  position: relative;
+  width: 166px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(18, 8, 46, 0.84);
+  border: 2px solid rgba(0, 229, 255, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  cursor: ew-resize;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.track-arrow {
+  font-size: 13px;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.steer-thumb-puck {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #00e5ff, #2979ff);
+  border: 2px solid #fff;
+  box-shadow: 0 0 12px #00e5ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  transition: transform 0.06s linear;
+}
+
+/* 3 Power Pedals (Giant Kid-Friendly Targets + Pulsing Ready Badge + Active Drain State) */
+.pedals-dock {
+  display: flex;
+  gap: 10px;
+}
+
+.power-pedal {
+  position: relative;
+  width: 86px;
+  height: 92px;
+  border-radius: 24px;
+  border: 3px solid rgba(255, 255, 255, 0.45);
+  background: linear-gradient(160deg, rgba(60, 28, 120, 0.9), rgba(22, 10, 52, 0.95));
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  overflow: visible;
+  transition: transform 0.12s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.pedal-ready-cue {
+  position: absolute;
+  top: -11px;
+  right: -6px;
+  font-size: 14px;
+  background: linear-gradient(135deg, #ffd700, #ff9100);
+  border: 2px solid #fff;
+  border-radius: 999px;
+  padding: 1px 5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 0.15s, transform 0.15s;
+  pointer-events: none;
+}
+
+.power-pedal.ready {
+  border-color: #ffd700;
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.72);
+}
+
+.magnet-pedal.ready {
+  border-color: #00e5ff;
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.72);
+}
+
+.rocket-pedal.ready {
+  border-color: #ff9100;
+  box-shadow: 0 0 18px rgba(255, 145, 0, 0.75);
+}
+
+.smash-pedal.ready {
+  border-color: #ff4081;
+  box-shadow: 0 0 18px rgba(255, 64, 129, 0.75);
+}
+
+.power-pedal.ready .pedal-ready-cue {
+  opacity: 1;
+  transform: scale(1);
+  animation: pulsePlay 0.9s ease-in-out infinite;
+}
+
+.power-pedal.recharging {
+  opacity: 0.62;
+  filter: saturate(0.55);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+}
+
+.power-pedal.active-glow {
+  border-color: #00e676;
+  box-shadow: 0 0 28px #00e676;
+  transform: translateY(-5px) scale(1.07);
+}
+
+.magnet-pedal.active-glow {
+  border-color: #00e5ff;
+  box-shadow: 0 0 30px #00e5ff, inset 0 0 16px rgba(0, 229, 255, 0.45);
+}
+
+.rocket-pedal.active-glow {
+  border-color: #ffab00;
+  box-shadow: 0 0 30px #ff9100, inset 0 0 16px rgba(255, 145, 0, 0.45);
+}
+
+.smash-pedal.active-glow {
+  border-color: #ff4081;
+  box-shadow: 0 0 30px #ff4081, inset 0 0 16px rgba(255, 64, 129, 0.45);
+}
+
+.power-pedal.pedal-triggered {
+  animation: pedalTriggerPop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes pedalTriggerPop {
+  0% { transform: scale(0.86); }
+  55% { transform: translateY(-7px) scale(1.14); }
+  100% { transform: translateY(-5px) scale(1.07); }
+}
+
+.power-pedal:active {
+  transform: scale(0.91);
+}
+
+.pedal-emoji {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.pedal-sub {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.pedal-charge-bar {
+  width: 82%;
+  height: 9px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-top: 3px;
+}
+
+.pedal-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #00e5ff, #00e676);
+  transition: width 0.08s linear;
+}
+
+.magnet-pedal .pedal-fill {
+  background: linear-gradient(90deg, #00b0ff, #00e5ff, #84ffff);
+}
+
+.rocket-pedal .pedal-fill {
+  background: linear-gradient(90deg, #ff3d00, #ff9100, #ffea00);
+}
+
+.smash-pedal .pedal-fill {
+  background: linear-gradient(90deg, #f50057, #ff4081, #ffd740);
+}
+
+/* Result Podium Modal */
+.result-panel {
+  width: min(94vw, 640px);
+  gap: 14px;
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+}
+
+.result-panel.defeat-mode {
+  border-color: rgba(255, 82, 82, 0.78);
+  background: linear-gradient(165deg, rgba(58, 18, 68, 0.92), rgba(24, 10, 38, 0.96));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.72), 0 0 36px rgba(255, 23, 68, 0.38);
+}
+
+.result-banner-icons {
+  font-size: 44px;
+  letter-spacing: 8px;
+}
+
+.result-stars-row {
+  font-size: 42px;
+  letter-spacing: 10px;
+  min-height: 52px;
+  filter: drop-shadow(0 0 14px rgba(255, 215, 0, 0.8));
+}
+
+.result-panel.defeat-mode .result-stars-row {
+  filter: grayscale(0.85) opacity(0.65);
+}
+
+.podium-stage {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 215px;
+  padding: 12px 6px 4px;
+}
+
+.podium-col {
+  flex: 1;
+  max-width: 108px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.podium-col.qualifier .podium-pillar {
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.42), inset 0 3px 8px rgba(255, 255, 255, 0.45);
+}
+
+.podium-col.non-qualifier {
+  opacity: 0.76;
+  filter: saturate(0.68);
+}
+
+.podium-col.non-qualifier.first-non-qualifier {
+  margin-left: 8px;
+  padding-left: 8px;
+  border-left: 2px dashed rgba(255, 255, 255, 0.28);
+}
+
+.podium-rank-stars {
+  font-size: 13px;
+  line-height: 1.1;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(255, 215, 0, 0.22);
+  border: 1px solid rgba(255, 215, 0, 0.55);
+  white-space: nowrap;
+}
+
+.podium-col.non-qualifier .podium-rank-stars {
+  background: rgba(255, 82, 82, 0.22);
+  border-color: rgba(255, 82, 82, 0.5);
+}
+
+.podium-avatar-wrap {
+  position: relative;
+}
+
+.podium-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.podium-col.is-player .podium-avatar {
+  border-color: #ffd700;
+  box-shadow: 0 0 18px #ffd700;
+  transform: scale(1.12);
+}
+
+.podium-col.is-player.non-qualifier .podium-avatar {
+  border-color: #ff5252;
+  box-shadow: 0 0 18px #ff5252;
+}
+
+.podium-medal {
+  font-size: 24px;
+}
+
+.podium-perk-badge {
+  font-size: 13px;
+  background: rgba(0, 0, 0, 0.32);
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.podium-pillar {
+  width: 100%;
+  border-radius: 14px 14px 6px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 900;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  box-shadow: inset 0 3px 8px rgba(255, 255, 255, 0.35);
+}
+
+.result-actions {
+  display: flex;
+  gap: 18px;
+  margin-top: 6px;
+}
+
+.action-circle-btn {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.action-circle-btn:hover {
+  transform: scale(1.08);
+}
+
+.home-btn {
+  background: linear-gradient(135deg, #7c4dff, #536dfe);
+}
+
+.retry-btn {
+  background: linear-gradient(135deg, #ff9100, #ff3d00);
+}
+
+.retry-btn.pulse-cta {
+  animation: pulsePlay 1.15s infinite;
+  border-color: #ffd700;
+  box-shadow: 0 0 26px rgba(255, 145, 0, 0.9);
+}
+
+.next-btn {
+  background: linear-gradient(135deg, #00e676, #00b0ff);
+  animation: pulsePlay 1.4s infinite;
+}
+
+.next-btn.hidden {
+  display: none;
+}
+
+@media (max-width: 560px) {
+  .critter-avatar { width: 42px; height: 42px; }
+  .hud-hero-chip { display: none; }
+  .steer-btn { width: 64px; height: 64px; font-size: 28px; }
+  .steer-touch-track { width: 136px; height: 24px; }
+  .power-pedal { width: 70px; height: 78px; border-radius: 20px; }
+  .pedal-emoji { font-size: 24px; }
+  .podium-stage { gap: 6px; min-height: 185px; }
+  .podium-avatar { width: 44px; height: 44px; }
+  .podium-rank-stars { font-size: 11px; padding: 1px 4px; }
+  .action-circle-btn { width: 64px; height: 64px; font-size: 28px; }
+}
+
+@media (max-width: 480px) {
+  .screen {
+    height: 100dvh;
+    padding-bottom: max(10px, env(safe-area-inset-bottom, 10px));
+  }
+  .hud-top {
+    padding: max(8px, env(safe-area-inset-top, 8px)) 64px 4px 10px;
+    gap: 6px;
+  }
+  .hud-bottom {
+    padding: 4px 8px max(8px, env(safe-area-inset-bottom, 8px));
+    gap: 8px;
+  }
+  .steer-pad {
+    gap: 6px;
+  }
+  .steer-btn {
+    width: 54px;
+    height: 54px;
+    font-size: 24px;
+  }
+  .steer-touch-track {
+    width: 112px;
+    height: 22px;
+  }
+  .pedals-dock {
+    gap: 6px;
+  }
+  .power-pedal {
+    width: 58px;
+    height: 68px;
+    border-radius: 16px;
+  }
+  .pedal-emoji {
+    font-size: 20px;
+  }
+  .pedal-sub {
+    font-size: 11px;
+  }
+  .result-panel {
+    width: 96vw;
+    padding: 14px 10px;
+    gap: 10px;
+  }
+  .result-banner-icons {
+    font-size: 32px;
+    letter-spacing: 4px;
+  }
+  .result-stars-row {
+    font-size: 30px;
+    min-height: 38px;
+  }
+  .podium-stage {
+    gap: 4px;
+    min-height: 165px;
+    padding: 6px 2px 2px;
+  }
+  .podium-col.non-qualifier.first-non-qualifier {
+    margin-left: 3px;
+    padding-left: 4px;
+  }
+  .podium-avatar {
+    width: 38px;
+    height: 38px;
+    border-width: 2px;
+  }
+  .podium-medal {
+    font-size: 18px;
+  }
+  .podium-rank-stars {
+    font-size: 9px;
+    padding: 1px 3px;
+  }
+  .podium-perk-badge {
+    font-size: 10px;
+    padding: 1px 4px;
+  }
+  .podium-pillar {
+    font-size: 16px;
+  }
+}
+
+@media (max-height: 620px) {
+  .screen {
+    height: 100dvh;
+  }
+  .hud-top {
+    padding-top: 6px;
+    gap: 4px;
+  }
+  .hud-bottom {
+    padding-bottom: max(6px, env(safe-area-inset-bottom, 6px));
+  }
+  .steer-btn {
+    width: 58px;
+    height: 58px;
+    font-size: 24px;
+  }
+  .power-pedal {
+    width: 64px;
+    height: 68px;
+  }
+  .result-panel {
+    padding: 10px 14px;
+    gap: 6px;
+    max-height: 94dvh;
+  }
+  .result-banner-icons {
+    font-size: 28px;
+  }
+  .result-stars-row {
+    font-size: 28px;
+    min-height: 34px;
+  }
+  .podium-stage {
+    min-height: 138px;
+    padding: 4px 4px 2px;
+  }
+  .podium-avatar {
+    width: 38px;
+    height: 38px;
+  }
+  .podium-pillar {
+    max-height: 76px;
+  }
+  .action-circle-btn {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+}
+

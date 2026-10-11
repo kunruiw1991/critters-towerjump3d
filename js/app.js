@@ -2589,13 +2589,11 @@
 
       const shake = game.trauma * game.trauma;
       const tSec = performance.now() * 0.001;
-      const shakeX = shake * 0.25 * (Math.sin(tSec * 43) * 0.6 + Math.cos(tSec * 71) * 0.4);
-      const shakeY = shake * 0.25 * (Math.cos(tSec * 53) * 0.6 + Math.sin(tSec * 89) * 0.4);
-      const shakeRoll = shake * 0.021 * Math.sin(tSec * 61);
+      const shakeX = shake * 0.07 * (Math.sin(tSec * 25) * 0.6 + Math.cos(tSec * 37) * 0.4);
+      const shakeY = shake * 0.07 * (Math.cos(tSec * 29) * 0.6 + Math.sin(tSec * 41) * 0.4);
 
       camera.position.set(shakeX, game.camSmoothY + 4.4 + shakeY, 15.5);
       camera.lookAt(0, game.camSmoothY + 1.2, 0);
-      camera.rotation.z += shakeRoll;
     }
 
     syncRacerTransforms();
